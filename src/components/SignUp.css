@@ -1,0 +1,87 @@
+/* SignUpSignIn.css */
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    padding: 20px;
+  }
+  
+  .image-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .image-container img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+  }
+  
+  .form-container {
+    flex: 1;
+    padding: 20px;
+  }
+  
+  .signup-signin-container {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .blue-text {
+    color: #2970ff;
+  }
+  
+  .input-wrapper {
+    margin-bottom: 15px;
+  }
+  
+  .input-wrapper p {
+    margin-bottom: 5px;
+  }
+  
+  .input-wrapper input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .btn {
+    width: 100%;
+    padding: 15px;
+    background-color: #2970ff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .btn-blue {
+    background-color: #0056b3;
+  }
+  
+  .btn:hover {
+    opacity: 0.9;
+  }
+  
+  @media (max-width: 768px) {
+    .container {
+      flex-direction: column;
+    }
+  
+    .image-container,
+    .form-container {
+      width: 100%;
+    }
+  
+    .image-container {
+      margin-bottom: 20px;
+    }
+  }
+  
