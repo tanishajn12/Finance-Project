@@ -1,0 +1,101 @@
+
+
+  .header {
+    background-color: #004d40; /* Dark Teal */
+    color: white;
+    
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+  
+  /* Card Styles */
+  .ant-card {
+    background-color: white;
+    box-shadow: 0px 0px 15px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 5px;
+
+    
+  }
+  
+  
+  .ant-card h2 {
+    font-weight: bold;
+    font-size:20px;
+    text-align: center;
+  }
+  
+  /* Line Chart Styles */
+  .ant-line-chart {
+    margin-top: 10px;
+  }
+  
+  /* Pie Chart Styles */
+  .ant-pie-chart {
+    margin-top: 10px;
+  }
+  
+  /* Buttons */
+  .ant-btn {
+    background-color: #ff6f61; /* Coral */
+    color: white;
+    border-radius: 20px;
+  }
+  
+  .ant-btn:hover {
+    background-color: #ff8a80; /* Lighter Coral */
+    border-color: #ff8a80;
+    box-shadow: 0px 0px 10px 3px rgba(255, 111, 97, 0.5);
+  }
+  
+  /* Modal Styles */
+  .ant-modal {
+    border-radius: 10px;
+  }
+  
+  .ant-modal-header {
+    background-color: #ee3b27; 
+    color: white;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+  }
+  
+  .ant-modal-footer {
+    background-color: #f0f2f5;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+  }
+  
+  /* .ant-modal-content {
+    border-radius: 10px;
+  } */
+  
+  /* No Transactions Message */
+  .no-transactions {
+    text-align: center;
+    color: #777;
+    font-size: 18px;
+    padding: 20px;
+  }
+  
+  /* Transaction Search */
+  .transaction-search {
+    margin-top: 20px;
+  }
+  
+  .transaction-search input {
+    border-radius: 20px;
+    border-color: #004d40; /* Dark Teal */
+  }
+  
+  .transaction-search button {
+    border-radius: 20px;
+    background-color: #ff6f61; /* Coral */
+    color: white;
+  }
+  
+  .transaction-search button:hover {
+    background-color: #ff8a80; /* Lighter Coral */
+  }

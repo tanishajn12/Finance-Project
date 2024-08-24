@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Card, Row } from "antd";
 import { Line, Pie } from "@ant-design/charts";
@@ -6,6 +7,7 @@ import TransactionSearch from "./TransactionSearch";
 import Header from "./Header";
 import AddIncomeModal from "./Modals/AddIncome";
 import AddExpenseModal from "./Modals/AddExpense";
+import AddSavingModal from "./Modals/AddSaving";
 import Cards from "./Cards";
 import NoTransactions from "./NoTransactions";
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -15,98 +17,21 @@ import Loader from "./Loader";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { unparse } from "papaparse";
+import "./dashboard.css";
 
 const Dashboard = () => {
   const [user] = useAuthState(auth);
-
-  // const sampleTransactions = [
-  // {
-  //   name: "Pay day",
-  //   type: "income",
-  //   date: "2023-01-15",
-  //   amount: 2000,
-  //   tag: "salary",
-  // },
-  // {
-  //   name: "Dinner",
-  //   type: "expense",
-  //   date: "2023-01-20",
-  //   amount: 500,
-  //   tag: "food",
-  // },
-  // {
-  //   name: "Books",
-  //   type: "expense",
-  //   date: "2023-01-25",
-  //   amount: 300,
-  //   tag: "education",
-  // },
-  // ];
   const [isExpenseModalVisible, setIsExpenseModalVisible] = useState(false);
   const [isIncomeModalVisible, setIsIncomeModalVisible] = useState(false);
+  const [isSavingModalVisible, setIsSavingModalVisible] = useState(false);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentBalance, setCurrentBalance] = useState(0);
   const [income, setIncome] = useState(0);
   const [expenses, setExpenses] = useState(0);
+  const [savings, setSavings] = useState(0);
 
   const navigate = useNavigate();
-
-  const processChartData = () => {
-    const balanceData = [];
-    const spendingData = {};
-
-    transactions.forEach((transaction) => {
-      const monthYear = moment(transaction.date).format("MMM YYYY");
-      const tag = transaction.tag;
-
-      if (transaction.type === "income") {
-        if (balanceData.some((data) => data.month === monthYear)) {
-          balanceData.find((data) => data.month === monthYear).balance +=
-            transaction.amount;
-        } else {
-          balanceData.push({ month: monthYear, balance: transaction.amount });
-        }
-      } else {
-        if (balanceData.some((data) => data.month === monthYear)) {
-          balanceData.find((data) => data.month === monthYear).balance -=
-            transaction.amount;
-        } else {
-          balanceData.push({ month: monthYear, balance: -transaction.amount });
-        }
-
-        if (spendingData[tag]) {
-          spendingData[tag] += transaction.amount;
-        } else {
-          spendingData[tag] = transaction.amount;
-        }
-      }
-    });
-
-    const spendingDataArray = Object.keys(spendingData).map((key) => ({
-      category: key,
-      value: spendingData[key],
-    }));
-
-    return { balanceData, spendingDataArray };
-  };
-
-  const { balanceData, spendingDataArray } = processChartData();
-  const showExpenseModal = () => {
-    setIsExpenseModalVisible(true);
-  };
-
-  const showIncomeModal = () => {
-    setIsIncomeModalVisible(true);
-  };
-
-  const handleExpenseCancel = () => {
-    setIsExpenseModalVisible(false);
-  };
-
-  const handleIncomeCancel = () => {
-    setIsIncomeModalVisible(false);
-  };
 
   useEffect(() => {
     fetchTransactions();
@@ -117,13 +42,15 @@ const Dashboard = () => {
       type: type,
       date: moment(values.date).format("YYYY-MM-DD"),
       amount: parseFloat(values.amount),
-      tag: values.tag,
+      tag: values.tag || "saving", // Default tag for savings
       name: values.name,
     };
 
     setTransactions([...transactions, newTransaction]);
     setIsExpenseModalVisible(false);
     setIsIncomeModalVisible(false);
+    setIsSavingModalVisible(false); // Close saving modal
+
     addTransaction(newTransaction);
     calculateBalance();
   };
@@ -131,24 +58,51 @@ const Dashboard = () => {
   const calculateBalance = () => {
     let incomeTotal = 0;
     let expensesTotal = 0;
+    let savingsTotal = 0;
 
     transactions.forEach((transaction) => {
       if (transaction.type === "income") {
         incomeTotal += transaction.amount;
-      } else {
+      } else if (transaction.type === "expense") {
         expensesTotal += transaction.amount;
+      } else if (transaction.type === "saving") {
+        savingsTotal += transaction.amount;
       }
     });
 
     setIncome(incomeTotal);
     setExpenses(expensesTotal);
-    setCurrentBalance(incomeTotal - expensesTotal);
+    setSavings(savingsTotal);
+    setCurrentBalance(incomeTotal - expensesTotal + savingsTotal);
   };
 
-  // Calculate the initial balance, income, and expenses
   useEffect(() => {
     calculateBalance();
   }, [transactions]);
+
+  const showExpenseModal = () => {
+    setIsExpenseModalVisible(true);
+  };
+
+  const showIncomeModal = () => {
+    setIsIncomeModalVisible(true);
+  };
+
+  const showSavingModal = () => {
+    setIsSavingModalVisible(true);
+  };
+
+  const handleExpenseCancel = () => {
+    setIsExpenseModalVisible(false);
+  };
+
+  const handleIncomeCancel = () => {
+    setIsIncomeModalVisible(false);
+  };
+
+  const handleSavingCancel = () => {
+    setIsSavingModalVisible(false);
+  };
 
   async function addTransaction(transaction, many) {
     try {
@@ -175,7 +129,6 @@ const Dashboard = () => {
       const querySnapshot = await getDocs(q);
       let transactionsArray = [];
       querySnapshot.forEach((doc) => {
-        // doc.data() is never undefined for query doc snapshots
         transactionsArray.push(doc.data());
       });
       setTransactions(transactionsArray);
@@ -183,6 +136,29 @@ const Dashboard = () => {
     }
     setLoading(false);
   }
+
+  const balanceData = transactions.reduce((acc, transaction) => {
+    const monthYear = moment(transaction.date).format("MMM YYYY");
+    const index = acc.findIndex((data) => data.month === monthYear);
+    if (index !== -1) {
+      acc[index].balance += transaction.type === "income" ? transaction.amount : -transaction.amount;
+    } else {
+      acc.push({
+        month: monthYear,
+        balance: transaction.type === "income" ? transaction.amount : -transaction.amount,
+      });
+    }
+    return acc;
+  }, []);
+
+  const spendingDataArray = Object.entries(
+    transactions.reduce((acc, transaction) => {
+      if (transaction.type === "expense") {
+        acc[transaction.tag] = (acc[transaction.tag] || 0) + transaction.amount;
+      }
+      return acc;
+    }, {})
+  ).map(([category, value]) => ({ category, value }));
 
   const balanceConfig = {
     data: balanceData,
@@ -199,6 +175,7 @@ const Dashboard = () => {
   function reset() {
     console.log("resetting");
   }
+
   const cardStyle = {
     boxShadow: "0px 0px 30px 8px rgba(227, 227, 227, 0.75)",
     margin: "2rem",
@@ -232,8 +209,10 @@ const Dashboard = () => {
             currentBalance={currentBalance}
             income={income}
             expenses={expenses}
+            savings={savings}
             showExpenseModal={showExpenseModal}
             showIncomeModal={showIncomeModal}
+            showSavingModal={showSavingModal}
             cardStyle={cardStyle}
             reset={reset}
           />
@@ -248,6 +227,11 @@ const Dashboard = () => {
             handleIncomeCancel={handleIncomeCancel}
             onFinish={onFinish}
           />
+          <AddSavingModal
+            isSavingModalVisible={isSavingModalVisible}
+            handleSavingCancel={handleSavingCancel}
+            onFinish={onFinish}
+          />
           {transactions.length === 0 ? (
             <NoTransactions />
           ) : (
@@ -255,15 +239,15 @@ const Dashboard = () => {
               <Row gutter={16}>
                 <Card bordered={true} style={cardStyle}>
                   <h2>Financial Statistics</h2>
-                  <Line {...{ ...balanceConfig, data: balanceData }} />
+                  <Line {...balanceConfig} />
                 </Card>
 
                 <Card bordered={true} style={{ ...cardStyle, flex: 0.45 }}>
                   <h2>Total Spending</h2>
-                  {spendingDataArray.length == 0 ? (
+                  {spendingDataArray.length === 0 ? (
                     <p>Seems like you haven't spent anything till now...</p>
                   ) : (
-                    <Pie {...{ ...spendingConfig, data: spendingDataArray }} />
+                    <Pie {...spendingConfig} />
                   )}
                 </Card>
               </Row>
