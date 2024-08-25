@@ -73,7 +73,7 @@ const Dashboard = () => {
     setIncome(incomeTotal);
     setExpenses(expensesTotal);
     setSavings(savingsTotal);
-    setCurrentBalance(incomeTotal - expensesTotal + savingsTotal);
+    setCurrentBalance(incomeTotal - expensesTotal - savingsTotal);
   };
 
   useEffect(() => {
@@ -137,19 +137,67 @@ const Dashboard = () => {
     setLoading(false);
   }
 
+  // const balanceData = transactions.reduce((acc, transaction) => {
+  //   const monthYear = moment(transaction.date).format("MMM YYYY");
+  //   const index = acc.findIndex((data) => data.month === monthYear);
+  //   if (index !== -1) {
+  //     acc[index].balance += transaction.type === "income" ? transaction.amount : -transaction.amount;
+  //   } else {
+  //     acc.push({
+  //       month: monthYear,
+  //       balance: transaction.type === "income" ? transaction.amount : -transaction.amount,
+  //     });
+  //   }
+  //   return acc;
+  // }, []);
+
+  // to show the currentBalance everymonth
+
+  
+  
   const balanceData = transactions.reduce((acc, transaction) => {
     const monthYear = moment(transaction.date).format("MMM YYYY");
     const index = acc.findIndex((data) => data.month === monthYear);
+  
+    // Calculate the previous total balance, or start with 0 if it's the first entry
+    let previousTotalBalance = acc.length > 0 ? acc[acc.length - 1].totalBalance : 0;
     if (index !== -1) {
-      acc[index].balance += transaction.type === "income" ? transaction.amount : -transaction.amount;
+      // If the month already exists in the array, update its income, expense, and total balance
+      if (transaction.type === "income") {
+        acc[index].income += transaction.amount;
+        acc[index].totalBalance+=acc[index].income;
+      } else {
+        acc[index].expense += transaction.amount;
+        acc[index].totalBalance -=acc[index].expense;
+      }
+      // Update total balance for the current month
+      acc[index].totalBalance = previousTotalBalance;
     } else {
+      // If the month doesn't exist, create a new entry with the current total balance
+      const income = transaction.type === "income" ? transaction.amount : 0;
+      const expense = transaction.type === "expense" ? transaction.amount : 0;
       acc.push({
         month: monthYear,
-        balance: transaction.type === "income" ? transaction.amount : -transaction.amount,
+        income: income,
+        expense: expense,
+        totalBalance: previousTotalBalance + income - expense,
       });
     }
+  
     return acc;
   }, []);
+  
+  // console.log(balanceData);
+  
+
+  
+
+  const transformedData = balanceData.flatMap(item => [
+    // { month: item.month, type: "Balance", value: item.totalBalance},
+    { month: item.month, type: "Income", value: item.income },
+    { month: item.month, type: "Expense", value: item.expense },
+  ]);
+  
 
   const spendingDataArray = Object.entries(
     transactions.reduce((acc, transaction) => {
@@ -160,11 +208,21 @@ const Dashboard = () => {
     }, {})
   ).map(([category, value]) => ({ category, value }));
 
+  // const balanceConfig = {
+  //   data: balanceData,
+  //   xField: "month",
+  //   yField: "balance",
+  // };
+
   const balanceConfig = {
-    data: balanceData,
+    data: transformedData,
     xField: "month",
-    yField: "balance",
+    yField: "value",        // This is the field where the metric values are stored
+    seriesField: "type",    // This distinguishes between "Balance", "Income", "Expense"
+    // Optional: Customize colors, tooltip, legend, etc.
+    color: ["#82ca9d", "#8884d8", "#ff7300"], // Example colors for Balance, Income, Expense
   };
+  
 
   const spendingConfig = {
     data: spendingDataArray,
@@ -178,9 +236,9 @@ const Dashboard = () => {
 
   const cardStyle = {
     boxShadow: "0px 0px 30px 8px rgba(227, 227, 227, 0.75)",
-    margin: "2rem",
+    margin: "2rem 1rem",
     borderRadius: "0.5rem",
-    minWidth: "400px",
+    // minWidth: "350px",
     flex: 1,
   };
 
