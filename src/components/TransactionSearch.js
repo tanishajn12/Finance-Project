@@ -132,6 +132,7 @@ const TransactionSearch = ({
           <Option value="">All</Option>
           <Option value="income">Income</Option>
           <Option value="expense">Expense</Option>
+          <Option value="saving">saving</Option>
         </Select>
       </div>
 

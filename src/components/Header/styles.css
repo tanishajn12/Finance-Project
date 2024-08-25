@@ -7,6 +7,17 @@
   justify-content: space-between;
   align-items: center;
 }
+.navbar-links {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.navbar-link {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
 
 .navbar-heading {
   color: #fff;
