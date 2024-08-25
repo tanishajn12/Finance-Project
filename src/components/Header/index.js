@@ -29,6 +29,9 @@ function Header() {
         <Link to="/dashboard" className="navbar-link">
           Dashboard
         </Link>
+        <Link to="https://loan-interview-game.vercel.app/" className="navbar-link">
+          Games
+        </Link>
         <Link to="/quiz" className="navbar-link">
           Quiz
         </Link>
